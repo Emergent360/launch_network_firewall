@@ -2,6 +2,6 @@
 # defaults file for launch_network_firewall
 ec2_name_prefix: Test
 ec2_region: us-east-1
-ami_name: asav9-14-1-10*
+ami_name: asav9-14-1-10-ENA-6836725a*
 instance_type: m4.large
 instance_count: 1
