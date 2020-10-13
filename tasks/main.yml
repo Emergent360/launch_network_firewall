@@ -60,5 +60,5 @@
   wait_for:
     port: 22
     host: "{{ item.private_ip }}"
-    timeout: 300
+    timeout: 400
   loop: "{{ ec2_result.instances }}"
