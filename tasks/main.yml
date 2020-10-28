@@ -11,7 +11,7 @@
   ec2_group_info:
     filters:
       vpc-id: "{{ vpc_net_facts.vpcs[0].id }}"
-      group-name: "{{ ec2_name_prefix }}-sg"
+#      group-name: "{{ ec2_name_prefix }}-sg"
     region: "{{ ec2_region }}"
   register: sg_net_facts
 
@@ -20,7 +20,7 @@
     region: "{{ ec2_region }}"
     filters:
       vpc-id: "{{ vpc_net_facts.vpcs[0].id }}"
-      "tag:Name": "{{ ec2_name_prefix }}-subnet"
+#      "tag:Name": "{{ ec2_name_prefix }}-subnet"
   register: subnet_info
 
 - name: "Find current, region-specific AMI ID."
