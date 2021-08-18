@@ -7,22 +7,45 @@
     region: "{{ ec2_region }}"
   register: vpc_net_facts
 
-- name: Get the SG ID for {{ ec2_name_prefix }}-sg
+- name: Set the VPC ID
+  set_fact:
+    vpc_id: "{{ vpc_net_facts.vpcs[0].id }}"
+
+- name: Get the SG info for {{ ec2_name_prefix }}-vpc
   ec2_group_info:
     filters:
-      vpc-id: "{{ vpc_net_facts.vpcs[0].id }}"
-#      group-name: "{{ ec2_name_prefix }}-sg"
+      vpc-id: "{{ vpc_id }}"
     region: "{{ ec2_region }}"
-  register: sg_net_facts
+  register: group_info
 
-- name: Get the subnet ID for {{ ec2_name_prefix }}-subnet
+- name: Select Public SG
+  set_fact:
+    group_id: "{{ group_info.security_groups | json_query(group_query) }}"
+  vars:
+    group_query: "[?group_name=='{{ ec2_name_prefix }}-Public-SG'].group_id"
+  when: tier == "Public"
+
+- name: Select Private SG
+  set_fact:
+    group_id: "{{ group_info.security_groups | json_query(group_query) }}"
+  vars:
+    group_query: "[?group_name=='{{ ec2_name_prefix }}-Private-SG'].group_id"
+  when: tier == "Private"
+
+- name: Get the subnet info for {{ ec2_name_prefix }}-vpc
   ec2_vpc_subnet_info:
     region: "{{ ec2_region }}"
     filters:
-      vpc-id: "{{ vpc_net_facts.vpcs[0].id }}"
+      vpc-id: "{{ vpc_id }}"
   register: subnet_info
 
-- name: "Find current, region-specific AMI ID."
+- name: Select Subnet ID
+  set_fact:
+    subnet_id: "{{ subnet_info.subnets | json_query(subnet_query) | first }}"
+  vars:
+    subnet_query: "[?tags.Name=='{{ ec2_name_prefix }}-{{ tier }}-{{ zone }}'].subnet_id"
+
+- name: "Find current, region-specific AMI."
   ec2_ami_info:
     region: "{{ ec2_region }}"
     filters:
@@ -40,24 +63,29 @@
     region: "{{ ec2_region }}"
     image: "{{ target_ami.image_id }}"
     instance_type: "{{ instance_type }}"
-    group_id: "{{ sg_net_facts.security_groups[0].group_id }}"
-    vpc_subnet_id: "{{ subnet_info.subnets[0].id }}"
+    group_id: "{{ group_id }}"
+    vpc_subnet_id: "{{ subnet_id }}"
     wait: yes
     wait_timeout: 500
-    exact_count: "{{ instance_count }}"
+    exact_count: 1
     count_tag: 
-      Name: "{{ ec2_name_prefix }} Firewall"
+      Name: "{{ ec2_name_prefix }} Firewall {{ item }}"
     instance_tags:
       Role: firewall
       Platform: ASA
-      Name: "{{ ec2_name_prefix }} Firewall"
+      Name: "{{ ec2_name_prefix }} Firewall {{ item }}"
       Inventory: "{{ ec2_name_prefix }}"
       Stage: "instantiated"
+  loop: "{{ range(1, instance_count +1)|list }}"
+  loop_control:
+    label: "{{ item }}"
   register: ec2_result
 
 - name: "Wait for connection on all hosts."
   wait_for:
+    host: "{{ item['tagged_instances'][0]['private_ip'] }}"
     port: 22
-    host: "{{ item.private_ip }}"
     timeout: 600
-  loop: "{{ ec2_result.instances }}"
+  loop: "{{ ec2.results }}"
+  loop_control:
+    label: "{{ item['tagged_instances'][0]['private_ip'] }}"
