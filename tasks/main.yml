@@ -90,13 +90,13 @@
 
 - name: attach eni for private subnet
   amazon.aws.ec2_eni:
-    instance_id: "{{ item[id] }}"
+    instance_id: "{{ item['tagged_instances'][0]['id'] }}"
     subnet_id: "{{ private_subnet_id }}"
     security_groups: "{{ private_group_id }}"
     state: present
-  loop: "{{ ec2.results.tagged_instances }}"
+  loop: "{{ ec2.results }}"
   loop_control:
-    label: "{{ item[id] }}"
+    label: "{{ item['tagged_instances'][0]['id'] }}"
 
 - name: "Wait for connection on all hosts."
   wait_for:
