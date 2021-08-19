@@ -73,11 +73,11 @@
     wait_timeout: 500
     exact_count: 1
     count_tag: 
-      Name: "{{ ec2_name_prefix }} Firewall {{ item }}"
+      Name: "{{ ec2_name_prefix }} Firewall {{ item }}-{{ zone }}"
     instance_tags:
       Role: firewall
       Platform: ASA
-      Name: "{{ ec2_name_prefix }} Firewall {{ item }}"
+      Name: "{{ ec2_name_prefix }} Firewall {{ item }}-{{ zone }}"
       Inventory: "{{ ec2_name_prefix }}"
       Stage: "instantiated"
   loop: "{{ range(1, instance_count +1)|list }}"
@@ -111,7 +111,7 @@
   wait_for:
     host: "{{ item['tagged_instances'][0]['private_ip'] }}"
     port: 22
-    timeout: 600
+    timeout: 300
   loop: "{{ ec2.results }}"
   loop_control:
     label: "{{ item['tagged_instances'][0]['private_ip'] }}"
