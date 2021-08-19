@@ -90,8 +90,9 @@
     tagged_instances: "{{ item.tagged_instances }}"
   with_items: "{{ ec2.results }}"
 
-#- debug:
-#    var: tagged_instances
+- debug:
+    var: "{{ item['id'] }}"
+  loop: "{{ tagged_instances }}"
 
 - name: attach eni for private subnet
   amazon.aws.ec2_eni:
