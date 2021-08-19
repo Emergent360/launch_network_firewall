@@ -91,7 +91,7 @@
   with_items: "{{ ec2.results }}"
 
 - debug:
-    var: tagged_instances.id
+    msg: "{{ tagged_instances | selectattr(id) }}"
 
 
 - name: attach eni for private subnet
