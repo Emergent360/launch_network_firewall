@@ -98,6 +98,15 @@
   loop_control:
     label: "{{ item['tagged_instances'][0]['id'] }}"
 
+- name: restart instance
+  amazon.aws.ec2:
+    region: "{{ ec2_region }}"
+    instance_id: "{{ item['tagged_instances'][0]['id'] }}"
+    state: restarted
+  loop: "{{ ec2.results }}"
+  loop_control:
+    label: "{{ item['tagged_instances'][0]['id'] }}"
+
 - name: "Wait for connection on all hosts."
   wait_for:
     host: "{{ item['tagged_instances'][0]['private_ip'] }}"
