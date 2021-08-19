@@ -85,8 +85,10 @@
     label: "{{ item }}"
   register: ec2
 
-- debug:
-    var: ec2.results
+- name: test
+  debug:
+    msg: "{{ item }}"
+  with_items: "{{ ec2.results }}"
 
 - name: attach eni for private subnet
   amazon.aws.ec2_eni:
