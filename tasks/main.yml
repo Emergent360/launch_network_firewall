@@ -90,6 +90,11 @@
     instance_id: "{{ item['tagged_instances'][0]['id'] }}"
   loop: "{{ ec2.results }}"
 
+- name: get dns name
+  set_fact:
+    private_dns_name: "{{ item['tagged_instances'][0]['private_dns_name'] }}"
+  loop: "{{ ec2.results }}"
+
 - name: attach eni for private subnet
   amazon.aws.ec2_eni:
     region: "{{ ec2_region }}"
@@ -102,11 +107,15 @@
     state: present
 
 - name: restart instance
-  amazon.aws.ec2:
-    region: "{{ ec2_region }}"
-    instance_id: "{{ instance_id }}"
-    state: restarted
-  loop: "{{ ec2.results }}"
+  cli_command:
+    command: reload
+    prompt:
+      - Save?
+      - confirm
+    answer:
+     - y
+     - y
+  delegate_to: "{{ private_dns_name }}"
 
 - name: "Wait for connection on all hosts."
   wait_for:
