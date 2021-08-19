@@ -79,7 +79,7 @@
   loop: "{{ range(1, instance_count +1)|list }}"
   loop_control:
     label: "{{ item }}"
-  register: ec2_result
+  register: ec2
 
 - name: "Wait for connection on all hosts."
   wait_for:
