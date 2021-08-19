@@ -85,15 +85,6 @@
     label: "{{ item }}"
   register: ec2
 
-- name: test
-  set_fact:
-    tagged_instances: "{{ item.tagged_instances }}"
-  with_items: "{{ ec2.results }}"
-
-- debug:
-    msg: "{{ tagged_instances | selectattr(id) | list | first }}"
-
-
 - name: attach eni for private subnet
   amazon.aws.ec2_eni:
     region: "{{ ec2_region }}"
