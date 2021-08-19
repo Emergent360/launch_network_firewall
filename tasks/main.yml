@@ -91,6 +91,7 @@
     instance_id: "{{ item['tagged_instances'][0]['id'] }}"
     subnet_id: "{{ private_subnet_id }}"
     security_groups: "{{ private_group_id }}"
+    device_index: 1
     attached: yes
     state: present
   loop: "{{ ec2.results }}"
