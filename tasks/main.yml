@@ -91,7 +91,7 @@
     subnet_id: "{{ private_subnet_id }}"
     security_groups: "{{ private_group_id }}"
     state: present
-  loop: "{{ ec2.tagged_instances }}"
+  loop: "{{ ec2.results['tagged_instances'] }}"
   loop_control:
     label: "{{ item[id] }}"
 
