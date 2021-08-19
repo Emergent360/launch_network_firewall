@@ -85,15 +85,13 @@
     label: "{{ item }}"
   register: ec2
 
-- debug:
-    var: ec2.results
-
 - name: attach eni for private subnet
   amazon.aws.ec2_eni:
     region: "{{ ec2_region }}"
     instance_id: "{{ item['tagged_instances'][0]['id'] }}"
     subnet_id: "{{ private_subnet_id }}"
     security_groups: "{{ private_group_id }}"
+    attached: yes
     state: present
   loop: "{{ ec2.results }}"
   loop_control:
