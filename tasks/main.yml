@@ -20,17 +20,15 @@
 
 - name: Select Public SG
   set_fact:
-    group_id: "{{ group_info.security_groups | json_query(group_query) }}"
+    public_group_id: "{{ group_info.security_groups | json_query(group_query) }}"
   vars:
     group_query: "[?group_name=='{{ ec2_name_prefix }}-Public-SG'].group_id"
-  when: tier == "Public"
 
 - name: Select Private SG
   set_fact:
-    group_id: "{{ group_info.security_groups | json_query(group_query) }}"
+    private_group_id: "{{ group_info.security_groups | json_query(group_query) }}"
   vars:
     group_query: "[?group_name=='{{ ec2_name_prefix }}-Private-SG'].group_id"
-  when: tier == "Private"
 
 - name: Get the subnet info for {{ ec2_name_prefix }}-vpc
   ec2_vpc_subnet_info:
@@ -39,11 +37,17 @@
       vpc-id: "{{ vpc_id }}"
   register: subnet_info
 
-- name: Select Subnet ID
+- name: Select Public Subnet ID
   set_fact:
-    subnet_id: "{{ subnet_info.subnets | json_query(subnet_query) | first }}"
+    public_subnet_id: "{{ subnet_info.subnets | json_query(subnet_query) | first }}"
   vars:
-    subnet_query: "[?tags.Name=='{{ ec2_name_prefix }}-{{ tier }}-{{ zone }}'].subnet_id"
+    subnet_query: "[?tags.Name=='{{ ec2_name_prefix }}-Public-{{ zone }}'].subnet_id"
+
+- name: Select Private Subnet ID
+  set_fact:
+    private_subnet_id: "{{ subnet_info.subnets | json_query(subnet_query) | first }}"
+  vars:
+    subnet_query: "[?tags.Name=='{{ ec2_name_prefix }}-Private-{{ zone }}'].subnet_id"
 
 - name: "Find current, region-specific AMI."
   ec2_ami_info:
@@ -63,8 +67,8 @@
     region: "{{ ec2_region }}"
     image: "{{ target_ami.image_id }}"
     instance_type: "{{ instance_type }}"
-    group_id: "{{ group_id }}"
-    vpc_subnet_id: "{{ subnet_id }}"
+    group_id: "{{ public_group_id }}"
+    vpc_subnet_id: "{{ public_subnet_id }}"
     wait: yes
     wait_timeout: 500
     exact_count: 1
