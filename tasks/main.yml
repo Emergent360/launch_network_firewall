@@ -93,25 +93,20 @@
 - name: attach eni for private subnet
   amazon.aws.ec2_eni:
     region: "{{ ec2_region }}"
-    instance_id: "{{ item['tagged_instances'][0]['id'] }}"
+    instance_id: "{{ instance_id }}"
     subnet_id: "{{ private_subnet_id }}"
     security_groups: "{{ private_group_id }}"
     name: "{{ ec2_name_prefix }} Firewall {{ item }}-{{ zone }} Inside"
     device_index: 1
     attached: yes
     state: present
-  loop: "{{ ec2.results }}"
-  loop_control:
-    label: "{{ item['tagged_instances'][0]['id'] }}"
 
 - name: restart instance
   amazon.aws.ec2:
     region: "{{ ec2_region }}"
-    instance_id: "{{ item['tagged_instances'][0]['id'] }}"
+    instance_id: "{{ instance_id }}"
     state: restarted
   loop: "{{ ec2.results }}"
-  loop_control:
-    label: "{{ item['tagged_instances'][0]['id'] }}"
 
 - name: "Wait for connection on all hosts."
   wait_for:
