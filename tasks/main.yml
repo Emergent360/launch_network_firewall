@@ -85,6 +85,16 @@
     label: "{{ item }}"
   register: ec2
 
+- name: attach eni for private subnet
+  amazon.awx.ec2_eni:
+    instance_id: "{{ item[id] }}"
+    subnet_id: "{{ private_subnet_id }}"
+    security_groups: "{{ private_group_id }}"
+    state: present
+  loop: "{{ ec2.tagged_instances }}"
+  loop_control:
+    label: "{{ item[id] }}"
+
 - name: "Wait for connection on all hosts."
   wait_for:
     host: "{{ item['tagged_instances'][0]['private_ip'] }}"
