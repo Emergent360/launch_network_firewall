@@ -106,6 +106,15 @@
     attached: yes
     state: present
 
+- name: "Wait for connection on all hosts."
+  wait_for:
+    host: "{{ item['tagged_instances'][0]['private_ip'] }}"
+    port: 22
+    timeout: 500
+  loop: "{{ ec2.results }}"
+  loop_control:
+    label: "{{ item['tagged_instances'][0]['private_ip'] }}"
+
 - name: restart instance
   cli_command:
     command: reload
@@ -121,7 +130,7 @@
   wait_for:
     host: "{{ item['tagged_instances'][0]['private_ip'] }}"
     port: 22
-    timeout: 300
+    timeout: 500
   loop: "{{ ec2.results }}"
   loop_control:
     label: "{{ item['tagged_instances'][0]['private_ip'] }}"
