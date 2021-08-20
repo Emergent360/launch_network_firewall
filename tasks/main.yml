@@ -114,23 +114,3 @@
   loop: "{{ ec2.results }}"
   loop_control:
     label: "{{ item['tagged_instances'][0]['private_ip'] }}"
-
-- name: restart instance
-  cli_command:
-    command: reload
-    prompt:
-      - Save?
-      - confirm
-    answer:
-     - y
-     - y
-  delegate_to: "{{ private_dns_name }}"
-
-- name: "Wait for connection on all hosts."
-  wait_for:
-    host: "{{ item['tagged_instances'][0]['private_ip'] }}"
-    port: 22
-    timeout: 500
-  loop: "{{ ec2.results }}"
-  loop_control:
-    label: "{{ item['tagged_instances'][0]['private_ip'] }}"
