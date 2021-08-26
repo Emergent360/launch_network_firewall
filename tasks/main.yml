@@ -108,8 +108,9 @@
   register: eni
 
 - name: modify eni
-  debug:
-    var: eni.interface.id
+  amazon.aws.ec2_eni:
+    eni_id: eni.interface.id
+    delete_on_termination: yes
 
 - name: "Wait for connection on all hosts."
   wait_for:
