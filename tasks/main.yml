@@ -110,7 +110,8 @@
 - name: modify eni
   amazon.aws.ec2_eni:
     region: "{{ ec2_region }}"
-    eni_id: eni.interface.id
+    eni_id: "{{ eni.interface.id }}"
+    subnet_id: "{{ eni.interface.subnet_id }}"
     delete_on_termination: yes
 
 - name: "Wait for connection on all hosts."
