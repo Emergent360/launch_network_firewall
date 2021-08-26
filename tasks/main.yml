@@ -105,6 +105,7 @@
     device_index: 1
     attached: yes
     state: present
+    delete_on_termination: yes
 
 - name: "Wait for connection on all hosts."
   wait_for:
