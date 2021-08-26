@@ -109,6 +109,7 @@
 
 - name: modify eni
   amazon.aws.ec2_eni:
+    region: "{{ ec2_region }}"
     eni_id: eni.interface.id
     delete_on_termination: yes
 
